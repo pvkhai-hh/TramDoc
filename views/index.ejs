@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Đọc - Nhà Sách Đám Mây</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --header-green: #154c2a; 
+            --sub-nav-green: #0d3b1f; 
+            --sidebar-green: #1e824c; 
+            --price-red: #d0021b;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .top-book-card {
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .top-book-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+            border-color: #ccc !important;
+        }
+
+        /* CSS cho Dòng thông báo chạy ngang */
+        .ticker-wrap {
+            width: 100%;
+            background-color: #0f6335; /* Màu nền vàng nhạt nổi bật */
+            border-bottom: 1px solid #ffe69c;
+            padding: 8px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .ticker-text {
+            display: inline-block;
+            padding-left: 100%; /* Bắt đầu từ mép phải màn hình */
+            animation: marquee 20s linear infinite; /* 20s là tốc độ chạy, chạy lặp lại vô hạn */
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Tạm dừng chạy khi đưa chuột vào để khách dễ đọc */
+        .ticker-wrap:hover .ticker-text {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Header */
+        .header-main { background-color: var(--header-green); padding: 12px 0; color: white; }
+        .logo-text { font-size: 28px; font-weight: 800; display: flex; align-items: center; }
+        .search-container input { border-radius: 20px; border: none; padding: 8px 20px; outline: none; }
+        
+        /* Menu Phụ */
+        .navbar-sub { background-color: var(--sub-nav-green); padding: 10px 0; }
+        .navbar-sub a { color: #fff; text-decoration: none; font-size: 14px; margin-right: 20px; display: inline-flex; align-items: center; gap: 6px; }
+        .navbar-sub a:hover { color: #4caf50; }
+
+        /* Sidebar */
+        .sidebar-container { border: 1px solid #e0e0e0; background: white; border-radius: 6px; overflow: hidden; }
+        .sidebar-header { background-color: var(--sidebar-green); color: white; padding: 12px 15px; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .category-link { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; color: #444; text-decoration: none; font-size: 14px; transition: 0.2s; }
+        .category-link i.left-icon { width: 22px; color: #666; }
+        .category-link:hover { background-color: #f8fff9; color: var(--sidebar-green); padding-left: 20px; }
+
+        /* Banner Carousel */
+        .banner-carousel { border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .banner-carousel img { width: 100%; height: auto; object-fit: cover; }
+        
+        /* Card Sách */
+        .section-title { font-size: 18px; font-weight: bold; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; display: inline-block; }
+        .book-card { background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 15px; height: 100%; transition: 0.3s; cursor: pointer; }
+        .book-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #ccc; }
+        .book-img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 12px; }
+        .book-title { font-size: 14px; font-weight: 600; line-height: 1.4; height: 40px; overflow: hidden; margin-bottom: 5px; color: #333; }
+        .book-author { font-size: 12px; color: #777; margin-bottom: 5px; }
+        .price-now { color: var(--price-red); font-weight: 700; font-size: 18px; }
+        .price-old { color: #999; text-decoration: line-through; font-size: 13px; margin-left: 6px; }
+        .stars { color: #ffc107; font-size: 11px; margin-top: 5px; }
+        
+        /* --- CSS CHO FOOTER --- */
+        .footer-custom {
+            background-color: var(--header-green); /* Đồng bộ màu với Header */
+            color: #e0e0e0;
+            padding-top: 3rem;
+            padding-bottom: 1.5rem;
+            margin-top: 4rem;
+            border-top: 4px solid var(--sidebar-green);
+        }
+        .footer-custom h5 {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            text-transform: uppercase;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+        .footer-custom a {
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .footer-custom a:hover {
+            color: #4caf50;
+            padding-left: 5px; /* Hiệu ứng thụt lùi cực đẹp */
+        }
+        .footer-custom ul {
+            padding-left: 0;
+            list-style: none;
+        }
+        .footer-custom ul li {
+            margin-bottom: 12px;
+        }
+        .footer-bottom {
+            background-color: var(--sub-nav-green); /* Màu đậm hơn cho dòng copyright */
+            color: #adb5bd;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-main">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="logo-area">
+                <a href="/" class="text-white text-decoration-none logo-text">
+                    <i class="fas fa-book-reader me-2"></i> TRẠM ĐỌC
+                </a>
+            </div>
+            <div class="search-container w-50 position-relative">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm..." autocomplete="off">
+                    <button type="button" class="btn btn-light text-success px-3"><i class="fas fa-search"></i></button>
+                </div>
+                
+                <div id="searchResults" class="dropdown-menu w-100 shadow position-absolute rounded-3 mt-1" style="display: none; top: 100%; left: 0; z-index: 9999; max-height: 400px; overflow-y: auto;">
+                    </div>
+            </div>
+            <div class="header-tools d-flex align-items-center gap-4">
+                <a href="/cart" class="text-white text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-shopping-cart fs-3 me-2"></i>
+                    <div style="line-height: 1.2;">
+                        <small class="opacity-75">Giỏ hàng</small><br>
+                        <strong>
+                            <% if (typeof session !== 'undefined' && session.cart) { %>
+                                <%= session.cart.length %> sản phẩm
+                            <% } else { %>
+                                0 sản phẩm
+                            <% } %>
+                        </strong>
+                    </div>
+                </a>
+                <li class="nav-item dropdown ms-3">
+                    <% if (typeof session !== 'undefined' && session.userId) { %>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> Xin chào, <%= session.fullname %> 
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown">
+                            
+                            <% if (session.role === 'admin') { %>
+                                <li>
+                                    <a class="dropdown-item py-2 fw-bold text-success" href="/admin/admin_dashboard">
+                                        <i class="fas fa-user-shield me-2"></i>Quản lý
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                            <% } %>
+                            <li><a class="dropdown-item py-2" href="/profile"><i class="fas fa-user-edit me-2 text-primary"></i>Hồ sơ</a></li>
+                            <li><a class="dropdown-item py-2" href="/orders"><i class="fas fa-shopping-bag me-2 text-warning"></i>Đơn hàng</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="/dangxuat"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                        </ul>
+                    <% } else { %>
+                        <a class="nav-link dropdown-toggle fw-bold" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #fdfbf7 !important;">
+                            <i class="fas fa-user me-1"></i> Tài khoản
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li><a class="dropdown-item py-2" href="/dangnhap"><i class="fas fa-user-circle fs-5"></i> Đăng nhập</a></li>
+                            <li><a class="dropdown-item py-2" href="/dangky"><i class="fas fa-user-plus fs-5"></i> Đăng ký</a></li>
+                        </ul>
+                    <% } %>
+                </li>
+            </div>
+        </div>
+    </header>
+
+    <div class="ticker-wrap">
+        <div class="ticker-text">
+            <i class="fas fa-bullhorn text-danger me-2"></i> 
+            🔥 CHÀO MỪNG ĐẾN VỚI TRẠM ĐỌC - NHÀ SÁCH ĐÁM MÂY SỐ 1 VIỆT NAM!🎉 
+            🚚 Miễn phí giao hàng toàn quốc. 
+            📖 Sách mới cập nhật mỗi ngày, cam kết 100% sách bản quyền!
+        </div>
+    </div>
+
+    <div class="container mt-4 mb-5">
+        <div class="row">
+            
+            <div class="col-md-3">
+                
+                <div class="sidebar-container">
+                    <div class="sidebar-header">DANH MỤC SẢN PHẨM</div>
+                    
+                    <a href="/?category=Sách Văn Học" class="category-link">
+                        <span><i class="fas fa-book-open left-icon"></i> Sách Văn Học</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+                    
+                    <a href="/?category=Sách Kỹ Năng" class="category-link">
+                        <span><i class="fas fa-network-wired left-icon"></i> Sách Kỹ Năng</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+                    
+                    <a href="/?category=Sách Thiếu Nhi" class="category-link">
+                        <span><i class="fas fa-child left-icon"></i> Sách Thiếu Nhi</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+                    
+                    <a href="/?category=Sách Tâm Lý Học" class="category-link">
+                        <span><i class="fas fa-newspaper left-icon"></i> Sách Tâm Lý Học</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+                    
+                    <a href="/?category=Sách Lịch Sử" class="category-link">
+                        <span><i class="fas fa-graduation-cap left-icon"></i> Sách Lịch Sử</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+                    
+                    <a href="/?category=Sách Khoa Học" class="category-link">
+                        <span><i class="fas fa-gift left-icon"></i> Sách Khoa Học</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+
+                    <a href="/?category=Khác" class="category-link">
+                        <span><i class="fas fa-gift left-icon"></i> Khác</span> 
+                        <i class="fas fa-chevron-right text-muted" style="font-size: 10px;"></i>
+                    </a>
+                </div>
+                
+                <div class="mt-4 mb-4">
+                    <h6 class="fw-bold mb-3 text-uppercase" style="border-left: 4px solid #198754; padding-left: 10px; color: #198754;">
+                    🔥Bán Chạy Nhất
+                    </h6>
+                    <div class="d-flex flex-column gap-3">
+                        <% if (typeof topSelling !== 'undefined') { %>
+                            <% topSelling.forEach(book => { %>
+                                <a href="/book/<%= book._id %>" class="text-decoration-none text-dark d-block mb-3">
+                                    <div class="d-flex align-items-center p-2 bg-white rounded shadow-sm border top-book-card">
+                                        <img src="<%= book.image %>" alt="<%= book.title %>" style="width: 60px; height: 85px; object-fit: contain; margin-right: 12px; background: #f8f9fa;">
+                                        
+                                        <div style="overflow: hidden; flex: 1;">
+                                            <h6 class="mb-1 text-truncate" style="font-size: 13px; font-weight: bold;" title="<%= book.title %>">
+                                                <%= book.title %>
+                                            </h6>
+                                            <p class="text-danger fw-bold mb-1" style="font-size: 13px;">
+                                                <%= book.price.toLocaleString('vi-VN') %>đ
+                                            </p>
+                                            <span class="badge bg-warning text-dark" style="font-size: 11px;">
+                                                Đã bán: <%= book.sold || 0 %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-9">
+                
+                <div id="tramDocBanner" class="carousel slide banner-carousel" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#tramDocBanner" data-bs-slide-to="0" class="active"></button>
+                        <button type="button" data-bs-target="#tramDocBanner" data-bs-slide-to="1"></button>
+                        <button type="button" data-bs-target="#tramDocBanner" data-bs-slide-to="2"></button>
+                    </div>
+                    
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="/images/banner1.png" alt="Banner 1">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/images/banner2.png" alt="Banner 2">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="/images/banner3.png" alt="Banner 3">
+                        </div>
+                    </div>
+
+                    <button class="carousel-control-prev" type="button" data-bs-target="#tramDocBanner" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#tramDocBanner" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </button>
+                </div>
+          
+                <div>
+                    <h5 class="section-title">SÁCH MỚI CẬP NHẬT</h5>
+                </div>
+                <div class="d-flex align-items-center flex-wrap gap-2 my-3">
+                    <button class="btn btn-outline-success btn-sm fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#filterBox">
+                        <i class="fas fa-filter me-1"></i> Lọc & Sắp xếp
+                    </button>
+
+                    <% if (typeof currentCategory !== 'undefined' && currentCategory) { %>
+                        <a href="/?sortPrice=<%= currentSort || '' %>" class="badge rounded-pill bg-success text-decoration-none p-2 shadow-sm" title="Bấm để xóa lọc">
+                            <%= currentCategory %> <i class="fas fa-times ms-1"></i>
+                        </a>
+                    <% } %>
+
+                    <% if (typeof currentSort !== 'undefined' && currentSort) { %>
+                        <a href="/?category=<%= currentCategory || '' %>" class="badge rounded-pill bg-success text-decoration-none p-2 shadow-sm" title="Bấm để xóa lọc">
+                            Giá: <%= currentSort === 'asc' ? 'Tăng dần' : 'Giảm dần' %> <i class="fas fa-times ms-1"></i>
+                        </a>
+                    <% } %>
+
+                    <% if ((typeof currentCategory !== 'undefined' && currentCategory) || (typeof currentSort !== 'undefined' && currentSort)) { %>
+                        <a href="/" class="text-danger small text-decoration-none fw-bold ms-2"><i class="fas fa-trash-alt me-1"></i>Xóa bộ lọc</a>
+                    <% } %>
+                </div>
+
+                <div class="collapse mb-4 <%= (typeof currentCategory !== 'undefined' && currentCategory) || (typeof currentSort !== 'undefined' && currentSort) ? 'show' : '' %>" id="filterBox">
+                    <div class="card card-body shadow-sm border-success border-top border-3">
+                        <form action="/" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold text-success small">Chọn thể loại</label>
+                                <select name="category" class="form-select">
+                                    <option value="">-- Tất cả thể loại --</option>
+                                    <option value="Sách Văn Học" <%= currentCategory === 'Sách Văn Học' ? 'selected' : '' %>>Sách Văn Học</option>
+                                    <option value="Sách Kỹ Năng" <%= currentCategory === 'Sách Kỹ Năng' ? 'selected' : '' %>>Sách Kỹ Năng</option>
+                                    <option value="Sách Tâm Lý Học" <%= currentCategory === 'Sách Tâm Lý Học' ? 'selected' : '' %>>Sách Tâm Lý Học</option>
+                                    <option value="Sách Khoa Học" <%= currentCategory === 'Sách Khoa Học' ? 'selected' : '' %>>Sách Khoa Học</option>
+                                    <option value="Sách Thiếu Nhi" <%= currentCategory === 'Sách Thiếu Nhi' ? 'selected' : '' %>>Sách Thiếu Nhi</option>
+                                    <option value="Sách Lịch Sử" <%= currentCategory === 'Sách Lịch Sử' ? 'selected' : '' %>>Sách Lịch Sử</option>
+                                    <option value="Khác" <%= currentCategory === 'Khác' ? 'selected' : '' %>>Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold text-success small">Sắp xếp giá</label>
+                                <select name="sortPrice" class="form-select">
+                                    <option value="">-- Mặc định (Mới nhất) --</option>
+                                    <option value="asc" <%= currentSort === 'asc' ? 'selected' : '' %>>Giá: Thấp đến Cao</option>
+                                    <option value="desc" <%= currentSort === 'desc' ? 'selected' : '' %>>Giá: Cao đến Thấp</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-success w-100 fw-bold">Áp dụng</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row row-cols-1 row-cols-md-4 g-3">
+                    <% listBooks.forEach(function(book) { %>
+                        <div class="col">
+                            <a href="/book/<%= book._id %>" class="text-decoration-none text-dark">
+                                <div class="book-card">
+                                    <img src="<%= book.image %>" class="book-img" alt="<%= book.title %>">
+                                    
+                                    <div class="book-author"><%= book.author %></div>
+                                    
+                                    <div class="book-title"><%= book.title %></div>
+                                    
+                                    <div class="price-now">
+                                        <%= book.price.toLocaleString('vi-VN') %>đ 
+                                    </div>
+                                    
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> 
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <% }); %>
+                </div>
+                
+                <% if (totalPages > 1) { %>
+                <%
+                    let queryParams = '';
+                    if (typeof currentCategory !== 'undefined' && currentCategory) queryParams += '&category=' + encodeURIComponent(currentCategory);
+                    if (typeof currentSort !== 'undefined' && currentSort) queryParams += '&sortPrice=' + currentSort;
+                %>
+                <nav aria-label="Page navigation" class="mt-5 mb-4">
+                    <ul class="pagination justify-content-center">
+                        
+                        <li class="page-item <%= current === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="/?page=<%= current - 1 %><%= queryParams %>">Trước</a>
+                        </li>
+
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= current === i ? 'active' : '' %>">
+                                <a class="page-link" href="/?page=<%= i %><%= queryParams %>"><%= i %></a>
+                            </li>
+                        <% } %>
+
+                        <li class="page-item <%= current === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="/?page=<%= current + 1 %><%= queryParams %>">Sau</a>
+                        </li>
+
+                    </ul>
+                </nav>
+                <% } %>
+                </div> 
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white"><i class="fas fa-book-reader me-2"></i> TRẠM ĐỌC</h5>
+                    <p class="small lh-lg" style="color: #bbb;">
+                        Hệ thống nhà sách đám mây hàng đầu Việt Nam. Chúng tôi cam kết mang đến cho bạn những đầu sách chất lượng, bản quyền 100% với mức giá tốt nhất thị trường.
+                    </p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-light fs-5"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <h5>Hỗ Trợ Khách Hàng</h5>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-angle-right me-2 text-success"></i>Hướng dẫn mua hàng</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right me-2 text-success"></i>Phương thức thanh toán</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right me-2 text-success"></i>Chính sách đổi trả</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right me-2 text-success"></i>Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <h5>Thông Tin Liên Hệ</h5>
+                    <ul class="lh-lg" style="color: #bbb;">
+                        <li><i class="fas fa-map-marker-alt me-2 text-success"></i> 18 Ung Văn Khiêm, Phường Long Xuyên, An Giang</li>
+                        <li><i class="fas fa-phone-alt me-2 text-success"></i> Hotline: <strong class="text-white">1900 7979</strong></li>
+                        <li><i class="fas fa-envelope me-2 text-success"></i> Email: hotro@tramdoc.vn</li>
+                        <li><i class="fas fa-clock me-2 text-success"></i> Giờ mở cửa: 8:00 - 22:00</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <div class="footer-bottom">
+        <div class="container fw-bold">
+            © 2026 Bản quyền thuộc về Trạm Đọc.
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <% if (typeof successMsg !== 'undefined' && successMsg) { %>
+        <script>
+            Swal.fire({
+                position: 'center',        // Hiện ra chính giữa trang
+                icon: 'success',           // Biểu tượng thành công
+                title: '<%= successMsg %>', // Nội dung thông báo
+                showConfirmButton: false,  // Không hiện nút OK
+                timer: 2000,               // Tự động đóng sau 2 giây
+                timerProgressBar: false,   // Tắt thanh thời gian chạy bên dưới
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown' // Hiệu ứng hiện ra (nếu có dùng animate.css)
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'  // Hiệu ứng biến mất
+                },
+                // Làm cho khung thông báo gọn hơn
+                width: '350px',
+                padding: '2em',
+                color: '#198754',
+                background: '#fff',
+                backdrop: `rgba(0,0,0,0.4)` // Làm mờ nền phía sau để làm nổi bật thông báo
+            });
+        </script>
+    <% } %>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById("searchInput");
+        const searchResults = document.getElementById("searchResults");
+        let timeout = null;
+
+        searchInput.addEventListener("input", function() {
+            clearTimeout(timeout);
+            const keyword = this.value.trim();
+
+            // Nếu xóa hết chữ thì ẩn khung kết quả
+            if (keyword.length === 0) {
+                searchResults.style.display = "none";
+                return;
+            }
+
+            // Đợi 300ms sau khi ngừng gõ mới gọi API để đỡ lag
+            timeout = setTimeout(() => {
+                fetch(`/api/search?q=${encodeURIComponent(keyword)}`)
+                    .then(res => res.json())
+                    .then(books => {
+                        searchResults.innerHTML = ""; // Xóa kết quả cũ
+                        
+                        if (books.length > 0) {
+                            books.forEach(book => {
+                                // Tạo thẻ a cho từng cuốn sách
+                                const item = document.createElement("a");
+                                item.href = `/book/${book._id}`; // Link qua trang chi tiết
+                                item.className = "dropdown-item d-flex align-items-center py-2 border-bottom text-wrap";
+                                item.style.whiteSpace = "normal"; // Cho phép rớt dòng nếu tên dài
+                                
+                                item.innerHTML = `
+                                    <img src="${book.image}" alt="book" style="width: 40px; height: 55px; object-fit: cover; margin-right: 12px; border-radius: 4px;">
+                                    <div>
+                                        <div class="fw-bold mb-1" style="font-size: 14px; line-height: 1.3;">${book.title}</div>
+                                        <div class="text-danger fw-bold small">${book.price.toLocaleString('vi-VN')} ₫</div>
+                                    </div>
+                                `;
+                                searchResults.appendChild(item);
+                            });
+                            searchResults.style.display = "block";
+                        } else {
+                            searchResults.innerHTML = '<div class="p-3 text-muted text-center small">Không tìm thấy sách phù hợp</div>';
+                            searchResults.style.display = "block";
+                        }
+                    })
+                    .catch(err => console.error(err));
+            }, 300);
+        });
+
+        // Ẩn khung kết quả khi click chuột ra ngoài
+        document.addEventListener("click", function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = "none";
+            }
+        });
+        
+        // Bật lại khung kết quả khi click vào lại ô input
+        searchInput.addEventListener("focus", function() {
+            if (this.value.trim().length > 0 && searchResults.innerHTML !== "") {
+                searchResults.style.display = "block";
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>

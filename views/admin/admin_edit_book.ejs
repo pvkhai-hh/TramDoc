@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa Thông Tin Sách - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root { --admin-primary: #154c2a; --admin-secondary: #1e824c; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { background-color: var(--admin-primary); min-height: 100vh; color: white; }
+        .sidebar a { color: rgba(255, 255, 255, 0.8); text-decoration: none; padding: 15px 20px; display: block; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background-color: var(--admin-secondary); color: white; border-left: 4px solid #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <div class="col-md-2 sidebar d-none d-md-flex flex-column">
+            <div class="p-4 text-center border-bottom border-secondary">
+                <h4 class="fw-bold mb-0"><i class="fas fa-book-reader me-2"></i>TRẠM ĐỌC</h4>
+                <small class="text-white-50">Nhà sách đám mây</small>
+            </div>
+            <nav class="mt-3 d-flex flex-column flex-grow-1">
+                <a href="/admin/dashboard"><i class="fas fa-chart-line me-2"></i> Tổng quan</a>
+                <a href="/admin/admin_orders"><i class="fas fa-shopping-cart me-2"></i> Quản lý đơn hàng</a>
+                <a href="/admin/admin_books" class="active"><i class="fas fa-book me-2"></i> Quản lý sách</a>
+                <a href="/admin/admin_users"><i class="fas fa-users me-2"></i> Quản lý người dùng</a>
+                <a href="/"><i class="fas fa-home me-2"></i> Về trang chủ</a>
+                <a href="/dangxuat" class="mt-auto mb-4 text-warning fw-bold"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a>
+            </nav>
+        </div>
+
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-success"><i class="fas fa-edit me-2"></i>CẬP NHẬT THÔNG TIN SÁCH</h2>
+                <a href="/admin/admin_books" class="btn btn-outline-secondary fw-bold"><i class="fas fa-arrow-left me-1"></i> Trở về</a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <form action="/admin/admin_books/edit/<%= book._id %>" method="POST" enctype="multipart/form-data">
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tên sách</label>
+                                    <input type="text" name="title" class="form-control" value="<%= book.title %>" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Tác giả</label>
+                                        <input type="text" name="tacGia" class="form-control" value="<%= book.tacGia %>" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Thể loại</label>
+                                        <select name="author" class="form-select" required>
+                                            <option value="Sách Văn Học" <%= book.author === 'Sách Văn Học' ? 'selected' : '' %>>Sách Văn Học</option>
+                                            <option value="Sách Kỹ Năng" <%= book.author === 'Sách Kỹ Năng' ? 'selected' : '' %>>Sách Kỹ Năng</option>
+                                            <option value="Sách Thiếu Nhi" <%= book.author === 'Sách Thiếu Nhi' ? 'selected' : '' %>>Sách Thiếu Nhi</option>
+                                            <option value="Sách Tâm Lý Học" <%= book.author === 'Sách Tâm Lý Học' ? 'selected' : '' %>>Sách Tâm Lý Học</option>
+                                            <option value="Sách Lịch Sử" <%= book.author === 'Sách Lịch Sử' ? 'selected' : '' %>>Sách Lịch Sử</option>
+                                            <option value="Sách Khoa Học" <%= book.author === 'Sách Khoa Học' ? 'selected' : '' %>>Sách Khoa Học</option>
+                                            <option value="Khác" <%= book.author === 'Khác' ? 'selected' : '' %>>Khác</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Giá bán (VNĐ)</label>
+                                        <input type="number" name="price" class="form-control" value="<%= book.price %>" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Giá nhập (VNĐ)</label>
+                                        <input type="number" name="importPrice" class="form-control" value="<%= book.importPrice %>" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Số lượng tồn kho</label>
+                                        <input type="number" name="stock" class="form-control" value="<%= book.stock %>" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Mô tả sách</label>
+                                    <textarea name="description" class="form-control" rows="5" required><%= book.description %></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Ảnh bìa hiện tại</label>
+                                    <div class="text-center bg-light border rounded p-3 mb-3">
+                                        <img src="<%= book.image %>" alt="Book Image" style="max-width: 100%; max-height: 250px; object-fit: contain;">
+                                    </div>
+                                    <label class="form-label fw-bold text-primary">Tải lên ảnh mới (Nếu muốn đổi)</label>
+                                    <input type="file" name="imageFile" class="form-control" accept="image/*">
+                                    <small class="text-muted">Bỏ trống nếu muốn giữ nguyên ảnh cũ.</small>
+                                </div>
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg fw-bold"><i class="fas fa-save me-2"></i> LƯU THAY ĐỔI</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

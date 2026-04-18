@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán - Trạm Đọc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5 mb-5">
+        
+        <h2 class="fw-bold mb-4 text-success"><i class="fas fa-money-check-alt me-2"></i>Tiến hành thanh toán</h2>
+
+        <form action="/checkout" method="POST">
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="bg-white rounded-4 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold border-bottom pb-3 mb-4">Thông tin giao hàng</h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Họ và tên người nhận</label>
+                            <input type="text" name="customerName" class="form-control" value="<%= user.fullname %>" placeholder="Họ và tên người nhận" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Số điện thoại liên hệ</label>
+                            <input type="tel" name="phone" class="form-control" value="<%= user.phone || '' %>" placeholder="Ví dụ: 0123456789" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Địa chỉ nhận hàng (Số nhà, đường, phường/xã, quận/huyện)</label>
+                            <textarea name="address" class="form-control" rows="3" placeholder="Ghi chú thêm số nhà, tên đường để Shipper dễ tìm..." required><%= user.address || '' %></textarea>
+                        </div>
+                    </div>
+                    <a href="/cart" class="text-decoration-none text-success fw-bold d-inline-block ms-2">
+                        <i class="fas fa-arrow-left"></i> Quay lại Giỏ hàng
+                    </a>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="bg-white rounded-4 shadow-sm p-4 border-top border-success border-4 position-sticky" style="top: 20px;">
+                        <h5 class="fw-bold border-bottom pb-3 mb-3">Tóm tắt đơn hàng (<%= cart.length %> sản phẩm)</h5>
+                        
+                        <div class="d-flex flex-column gap-3 mb-4" style="max-height: 250px; overflow-y: auto;">
+                            <% cart.forEach((item) => { %>
+                                <div class="d-flex align-items-center">
+                                    <img src="<%= item.image %>" class="rounded border" style="width: 45px; height: 60px; object-fit: contain;">
+                                    <div class="ms-3 flex-grow-1">
+                                        <div class="text-dark fw-bold text-truncate" style="font-size: 13px; max-width: 200px;"><%= item.title %></div>
+                                        <small class="text-muted">SL: <%= item.quantity %></small>
+                                    </div>
+                                    <div class="text-danger fw-bold ms-2" style="font-size: 14px;">
+                                        <%= (item.price * item.quantity).toLocaleString('vi-VN') %> ₫
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính:</span>
+                            <strong class="fs-6"><%= totalAmount.toLocaleString('vi-VN') %> ₫</strong>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span class="text-success fw-bold">Miễn phí</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-4 mt-2">
+                            <span class="fs-5 fw-bold">Tổng thanh toán:</span>
+                            <span class="fs-3 fw-bold text-danger"><%= totalAmount.toLocaleString('vi-VN') %> ₫</span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100 py-3 fw-bold text-uppercase rounded-pill shadow">
+                            Xác Nhận Đặt Hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

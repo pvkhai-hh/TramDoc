@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ hàng của bạn - Trạm Đọc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .cart-item { transition: 0.3s; }
+        .cart-item:hover { background-color: #fcfcfc; }
+        .action-btn { transition: 0.2s; cursor: pointer; }
+        .action-btn:hover { transform: scale(1.1); }
+        .checkout-card { position: sticky; top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold m-0 text-success"><i class="fas fa-shopping-basket me-2"></i>Giỏ Hàng Của Bạn</h2>
+            <a href="/" class="btn btn-outline-success rounded-pill fw-bold"><i class="fas fa-arrow-left me-2"></i>Tiếp tục mua sắm</a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <% if (cart.length === 0) { %>
+                    <div class="bg-white rounded-4 shadow-sm p-5 text-center">
+                        <img src="https://cdn-icons-png.flaticon.com/512/11329/11329060.png" alt="Empty Cart" style="width: 150px; opacity: 0.3;" class="mb-4">
+                        <h4 class="fw-bold text-secondary">Giỏ hàng của bạn đang trống</h4>
+                        <p class="text-muted">Hãy chọn thêm một vài cuốn sách hay nhé!</p>
+                        <a href="/" class="btn btn-success px-5 py-2 rounded-pill mt-3 fw-bold">Khám phá ngay</a>
+                    </div>
+                <% } else { %>
+                    <div class="bg-white rounded-4 shadow-sm p-4">
+                        <% cart.forEach((item, index) => { %>
+                            <div class="cart-item d-flex align-items-center border-bottom py-3 <%= index === cart.length - 1 ? 'border-0 pb-0' : '' %>">
+                                
+                                <img src="<%= item.image %>" class="rounded shadow-sm" style="width: 90px; height: 130px; object-fit: contain; border: 1px solid #f0f0f0;">
+                                
+                                <div class="ms-4 flex-grow-1">
+                                    <a href="/book/<%= item.bookId %>" class="text-dark text-decoration-none fw-bold fs-5 d-block mb-1"><%= item.title %></a>
+                                    <p class="text-danger fw-bold fs-6 mb-3"><%= item.price.toLocaleString('vi-VN') %> ₫</p>
+                                    
+                                    <div class="d-flex align-items-center gap-4">
+                                        <div class="d-flex align-items-center border rounded-pill px-2 py-1" style="background: #fff;">
+                                            <a href="/update-cart/decrease/<%= item.bookId %>" class="text-secondary text-decoration-none fs-5 px-2 action-btn"><i class="fas fa-minus-circle"></i></a>
+                                            <span class="fw-bold px-3 fs-5"><%= item.quantity %></span>
+                                            <a href="/update-cart/increase/<%= item.bookId %>" class="text-success text-decoration-none fs-5 px-2 action-btn"><i class="fas fa-plus-circle"></i></a>
+                                        </div>
+                                        
+                                        <a href="/update-cart/remove/<%= item.bookId %>" class="text-danger text-decoration-none action-btn" title="Xóa khỏi giỏ hàng">
+                                            <i class="fas fa-trash-alt fs-5"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-end ms-3">
+                                    <small class="text-muted d-block mb-1">Thành tiền</small>
+                                    <strong class="text-danger fs-4"><%= (item.price * item.quantity).toLocaleString('vi-VN') %> ₫</strong>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="col-md-4">
+                <div class="checkout-card bg-white rounded-4 shadow-sm p-4 border-top border-success border-4">
+                    <h5 class="fw-bold mb-4">Tóm tắt đơn hàng</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tạm tính:</span>
+                        <strong class="fs-6"><%= totalAmount.toLocaleString('vi-VN') %> ₫</strong>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                        <span class="text-muted">Phí vận chuyển:</span>
+                        <span class="text-success fw-bold">Miễn phí</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-4 mt-2">
+                        <span class="fs-5 fw-bold">Tổng tiền:</span>
+                        <span class="fs-3 fw-bold text-danger"><%= totalAmount.toLocaleString('vi-VN') %> ₫</span>
+                    </div>
+                    
+                    <a href="/checkout" class="btn btn-danger w-100 py-3 fw-bold text-uppercase rounded-pill shadow <%= cart.length === 0 ? 'disabled' : '' %>">
+                        Tiến hành thanh toán
+                    </a>
+                    
+                    <p class="text-center text-muted mt-3" style="font-size: 12px;">
+                        <i class="fas fa-shield-alt text-success me-1"></i> Thanh toán an toàn và bảo mật
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <% if (typeof session !== 'undefined' && session.success) { %>
+        <script>
+            Swal.fire({
+                position: 'center', icon: 'success',
+                title: '<%= session.success %>',
+                showConfirmButton: false, timer: 1500
+            });
+        </script>
+        <% delete session.success; %> <% } %>
+
+</body>
+</html>

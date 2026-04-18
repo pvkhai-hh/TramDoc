@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Sách - Admin Trạm Đọc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root { --admin-primary: #154c2a; --admin-secondary: #1e824c; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { background-color: var(--admin-primary); min-height: 100vh; color: white; }
+        .sidebar a { color: rgba(255, 255, 255, 0.8); text-decoration: none; padding: 15px 20px; display: block; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background-color: var(--admin-secondary); color: white; border-left: 4px solid #fff; }
+        .book-img-thumb { width: 45px; height: 60px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <div class="col-md-2 sidebar d-none d-md-flex flex-column">
+            <div class="p-4 text-center border-bottom border-secondary">
+                <h4 class="fw-bold mb-0"><i class="fas fa-book-reader me-2"></i>TRẠM ĐỌC</h4>
+                <small class="text-white-50">Nhà sách đám mây</small>
+            </div>
+            <nav class="mt-3 d-flex flex-column flex-grow-1">
+                <a href="/admin/admin_dashboard"><i class="fas fa-chart-line me-2"></i> Tổng quan</a>
+                <a href="/admin/admin_orders"><i class="fas fa-shopping-cart me-2"></i> Quản lý đơn hàng</a>
+                <a href="/admin/admin_books" class="active"><i class="fas fa-book me-2"></i> Quản lý sách</a>
+                <a href="/admin/admin_users"><i class="fas fa-users me-2"></i> Quản lý người dùng</a>
+                <a href="/"><i class="fas fa-home me-2"></i> Về trang chủ</a>
+                <a href="/dangxuat" class="mt-auto mb-4 text-warning fw-bold"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a>
+            </nav>
+        </div>
+
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-success"><i class="fas fa-book me-2"></i>KHO SÁCH</h2>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/add-book" class="btn btn-success fw-bold shadow-sm"><i class="fas fa-plus-circle me-1"></i> Thêm Sách Mới</a>
+                    <span class="text-muted border-start ps-3"><i class="fas fa-user-circle"></i> Xin chào, <strong><%= session.fullname %></strong></span>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-success">
+                                <tr>
+                                    <th class="text-center">STT</th>
+                                    <th>Hình ảnh</th>
+                                    <th style="width: 25%;">Tên sách</th>
+                                    <th>Tác giả / Thể loại</th>
+                                    <th>Giá bán</th>
+                                    <th class="text-center">Tồn kho</th>
+                                    <th class="text-center">Đã bán</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (books.length === 0) { %>
+                                    <tr><td colspan="8" class="text-center py-4 text-muted">Kho sách hiện đang trống!</td></tr>
+                                <% } else { %>
+                                    <% books.forEach((book, index) => { %>
+                                        <tr>
+                                            <td class="text-center fw-bold text-muted"><%= index + 1 %></td>
+                                            <td>
+                                                <img src="<%= book.image %>" alt="<%= book.title %>" class="book-img-thumb bg-light">
+                                            </td>
+                                            <td class="fw-bold text-dark"><%= book.title %></td>
+                                            <td>
+                                                <span class="d-block text-secondary small"><i class="fas fa-pen-nib me-1"></i><%= book.tacGia %></span>
+                                                <span class="badge bg-light text-success border border-success mt-1"><%= book.author %></span>
+                                            </td>
+                                            <td class="text-danger fw-bold"><%= book.price.toLocaleString('vi-VN') %>đ</td>
+                                            <td class="text-center">
+                                                <% if (book.stock < 10) { %>
+                                                    <span class="badge bg-danger rounded-pill"><%= book.stock %></span>
+                                                <% } else { %>
+                                                    <span class="badge bg-info text-dark rounded-pill"><%= book.stock %></span>
+                                                <% } %>
+                                            </td>
+                                            <td class="text-center fw-bold text-success"><%= book.sold || 0 %></td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="/admin/admin_books/edit/<%= book._id %>" class="btn btn-sm btn-outline-primary" title="Sửa thông tin"><i class="fas fa-edit"></i></a>
+                                                    
+                                                    <form action="/admin/admin_books/delete/<%= book._id %>" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa cuốn sách này khỏi cơ sở dữ liệu không? Hành động này không thể hoàn tác!')">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa sách"><i class="fas fa-trash-alt"></i></button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<% if (typeof session !== 'undefined' && session.success) { %>
+    <script>Swal.fire({ position: 'center', icon: 'success', title: '<%= session.success %>', showConfirmButton: false, timer: 2000 });</script>
+<% } %>
+<% if (typeof session !== 'undefined' && session.error) { %>
+    <script>Swal.fire({ icon: 'error', title: 'Lỗi', text: '<%= session.error %>' });</script>
+<% } %>
+
+</body>
+</html>
