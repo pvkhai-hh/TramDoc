@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -723,6 +724,50 @@ router.post("/admin/admin_books/delete/:id", async (req, res) => {
     console.log(error);
     req.session.error = "Lỗi khi xóa sách!";
     res.redirect("/admin/admin_books");
+  }
+});
+
+// ==========================================
+// ROUTE: CHATBOT AI (GEMINI) TƯ VẤN SÁCH
+// ==========================================
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Dán mã API Key của bạn vào trong ngoặc kép bên dưới:
+const genAI = new GoogleGenerativeAI("process.env.GEMINI_API_KEY");
+
+router.post("/chat", async (req, res) => {
+  try {
+    const userMessage = req.body.message;
+
+    // Bơm ngữ cảnh: Lấy danh sách sách CÒN HÀNG
+    const Book = require("../models/Book"); // Gọi model Book
+    const availableBooks = await Book.find({ stock: { $gt: 0 } });
+    let bookListText = "";
+    availableBooks.forEach((book) => {
+      bookListText += `- ${book.title} (Thể loại: ${book.author}, Giá: ${book.price} VNĐ)\n`;
+    });
+
+    // Tạo lời nhắc cho AI
+    const prompt = `
+        Bạn là nhân viên tư vấn của nhà sách "Trạm Đọc".
+        QUY TẮC: Chỉ giới thiệu sách có trong danh sách dưới đây. Nếu khách hỏi sách khác, hãy xin lỗi và gợi ý sách trong danh sách.
+        Danh sách sách hiện có:
+        ${bookListText}
+
+        Khách hàng nói: "${userMessage}"
+        Trạm Đọc trả lời:
+        `;
+
+    // Gọi AI xử lý
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+
+    // Trả kết quả về giao diện
+    res.json({ reply: response.text() });
+  } catch (error) {
+    console.error("Lỗi Chatbot:", error);
+    res.json({ reply: "Dạ hệ thống đang bận, anh/chị thử lại sau nhé!" });
   }
 });
 

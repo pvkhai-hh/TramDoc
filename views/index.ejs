@@ -565,5 +565,88 @@
     });
     </script>
 
+    <style>
+    #chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+    #chat-btn { width: 60px; height: 60px; border-radius: 50%; background-color: #1e824c; color: white; border: none; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+    #chat-btn:hover { transform: scale(1.1); }
+    #chat-box { width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; position: absolute; bottom: 70px; right: 0; border: 1px solid #ddd; }
+    #chat-header { background: #154c2a; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    #close-chat { cursor: pointer; background: none; border: none; color: white; font-size: 18px; }
+    #chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; }
+    .msg-bot { background: #e9ecef; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .msg-user { background: #1e824c; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+    #chat-input-area { display: flex; border-top: 1px solid #ddd; padding: 10px; background: white; }
+    #chat-input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; }
+    #send-btn { background: none; border: none; color: #1e824c; font-size: 20px; cursor: pointer; padding: 0 10px; }
+</style>
+
+<div id="chat-widget">
+    <div id="chat-box">
+        <div id="chat-header">
+            <span><i class="fas fa-robot me-2"></i> Trạm Đọc AI</span>
+            <button id="close-chat"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="chat-messages">
+            <div class="msg msg-bot">Xin chào! Mình là trợ lý ảo của Trạm Đọc. Bạn đang cần tìm sách gì nhỉ? 😊</div>
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Nhập câu hỏi của bạn...">
+            <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <button id="chat-btn"><i class="fas fa-comments"></i></button>
+</div>
+
+<script>
+    const chatBtn = document.getElementById('chat-btn');
+    const chatBox = document.getElementById('chat-box');
+    const closeChat = document.getElementById('close-chat');
+    const sendBtn = document.getElementById('send-btn');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Mở/đóng khung chat
+    chatBtn.addEventListener('click', () => chatBox.style.display = chatBox.style.display === 'flex' ? 'none' : 'flex');
+    closeChat.addEventListener('click', () => chatBox.style.display = 'none');
+
+    // Gửi tin nhắn
+    const sendMessage = async () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // In tin nhắn của khách lên màn hình
+        chatMessages.innerHTML += `<div class="msg msg-user">${text}</div>`;
+        chatInput.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Hiện chữ "Đang gõ..."
+        const loadingId = 'loading-' + Date.now();
+        chatMessages.innerHTML += `<div id="${loadingId}" class="msg msg-bot">...đang gõ...</div>`;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Gọi API xuống Backend
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+            
+            // Xóa chữ "đang gõ" và in câu trả lời của AI
+            document.getElementById(loadingId).remove();
+            chatMessages.innerHTML += `<div class="msg msg-bot">${data.reply.replace(/\n/g, '<br>')}</div>`;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        } catch (error) {
+            document.getElementById(loadingId).remove();
+            chatMessages.innerHTML += `<div class="msg msg-bot text-danger">Lỗi kết nối, vui lòng thử lại!</div>`;
+        }
+    };
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+</script>
+
 </body>
 </html>
