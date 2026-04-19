@@ -733,7 +733,7 @@ router.post("/admin/admin_books/delete/:id", async (req, res) => {
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Dán mã API Key của bạn vào trong ngoặc kép bên dưới:
-const genAI = new GoogleGenerativeAI("process.env.GEMINI_API_KEY");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post("/chat", async (req, res) => {
   try {
