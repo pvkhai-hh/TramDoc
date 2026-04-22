@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -776,7 +776,7 @@ const Groq = require("groq-sdk");
 
 // Khởi tạo kết nối với Groq (nó sẽ tự động tìm biến process.env.GROQ_API_KEY)
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 router.post("/chat", async (req, res) => {
@@ -786,7 +786,9 @@ router.post("/chat", async (req, res) => {
     // Lấy danh sách sách từ DB
     const Book = require("../models/Book");
     const books = await Book.find().limit(20);
-    const bookListText = books.map(b => `- ${b.title} (Giá: ${b.price} VNĐ)`).join("\n");
+    const bookListText = books
+      .map((b) => `- ${b.title} (Giá: ${b.price} VNĐ)`)
+      .join("\n");
 
     // Chỉ dẫn cho AI (System Prompt)
     const systemPrompt = `
@@ -800,9 +802,9 @@ router.post("/chat", async (req, res) => {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage }
+        { role: "user", content: userMessage },
       ],
-      model: "llama3-8b-8192", // Đây là model rất thông minh và siêu nhanh
+      model: "llama-3.3-70b-versatile", // Đây là model rất thông minh và siêu nhanh
       temperature: 0.7,
       max_tokens: 1024,
     });
