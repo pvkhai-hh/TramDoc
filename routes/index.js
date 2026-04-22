@@ -727,47 +727,93 @@ router.post("/admin/admin_books/delete/:id", async (req, res) => {
   }
 });
 
-// ==========================================
-// ROUTE: CHATBOT AI (GEMINI) TƯ VẤN SÁCH
-// ==========================================
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+// // CHATBOT: GEMINI
+// const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Dán mã API Key của bạn vào trong ngoặc kép bên dưới:
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// // Dán mã API Key của bạn vào trong ngoặc kép bên dưới:
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// router.post("/chat", async (req, res) => {
+//   try {
+//     const userMessage = req.body.message;
+
+//     // Bơm ngữ cảnh: Lấy danh sách sách CÒN HÀNG
+//     const Book = require("../models/Book"); // Gọi model Book
+//     const availableBooks = await Book.find({ stock: { $gt: 0 } });
+//     let bookListText = "";
+//     availableBooks.forEach((book) => {
+//       bookListText += `- ${book.title} (Thể loại: ${book.author}, Giá: ${book.price} VNĐ)\n`;
+//     });
+
+//     // Tạo lời nhắc cho AI
+//     const prompt = `
+//         Bạn là nhân viên tư vấn của nhà sách "Trạm Đọc".
+//         QUY TẮC: Chỉ giới thiệu sách có trong danh sách dưới đây. Nếu khách hỏi sách khác, hãy xin lỗi và gợi ý sách trong danh sách.
+//         Danh sách sách hiện có:
+//         ${bookListText}
+
+//         Khách hàng nói: "${userMessage}"
+//         Trạm Đọc trả lời:
+//         `;
+
+//     // Gọi AI xử lý
+
+//     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+//     const result = await model.generateContent(prompt);
+//     const response = await result.response;
+
+//     // Trả kết quả về giao diện
+//     res.json({ reply: response.text() });
+//   } catch (error) {
+//     console.error("Lỗi Chatbot:", error);
+//     res.json({ reply: "Dạ hệ thống đang bận, anh/chị thử lại sau nhé!" });
+//   }
+// });
+
+// ROUTE: CHATBOT AI (GROQ) TƯ VẤN SÁCH
+// ==========================================
+const Groq = require("groq-sdk");
+
+// Khởi tạo kết nối với Groq (nó sẽ tự động tìm biến process.env.GROQ_API_KEY)
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
 
 router.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
 
-    // Bơm ngữ cảnh: Lấy danh sách sách CÒN HÀNG
-    const Book = require("../models/Book"); // Gọi model Book
-    const availableBooks = await Book.find({ stock: { $gt: 0 } });
-    let bookListText = "";
-    availableBooks.forEach((book) => {
-      bookListText += `- ${book.title} (Thể loại: ${book.author}, Giá: ${book.price} VNĐ)\n`;
-    });
+    // Lấy danh sách sách từ DB
+    const Book = require("../models/Book");
+    const books = await Book.find().limit(20);
+    const bookListText = books.map(b => `- ${b.title} (Giá: ${b.price} VNĐ)`).join("\n");
 
-    // Tạo lời nhắc cho AI
-    const prompt = `
-        Bạn là nhân viên tư vấn của nhà sách "Trạm Đọc".
+    // Chỉ dẫn cho AI (System Prompt)
+    const systemPrompt = `
+        Bạn là nhân viên tư vấn cực kỳ thân thiện của nhà sách "Trạm Đọc".
         QUY TẮC: Chỉ giới thiệu sách có trong danh sách dưới đây. Nếu khách hỏi sách khác, hãy xin lỗi và gợi ý sách trong danh sách.
         Danh sách sách hiện có:
         ${bookListText}
+    `;
 
-        Khách hàng nói: "${userMessage}"
-        Trạm Đọc trả lời:
-        `;
+    // Gọi API của Groq
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage }
+      ],
+      model: "llama3-8b-8192", // Đây là model rất thông minh và siêu nhanh
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
 
-    // Gọi AI xử lý
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    // Lấy câu trả lời
+    const replyText = chatCompletion.choices[0]?.message?.content;
 
     // Trả kết quả về giao diện
-    res.json({ reply: response.text() });
+    res.json({ reply: replyText });
   } catch (error) {
-    console.error("Lỗi Chatbot:", error);
+    console.error("Lỗi Chatbot Groq:", error);
     res.json({ reply: "Dạ hệ thống đang bận, anh/chị thử lại sau nhé!" });
   }
 });
