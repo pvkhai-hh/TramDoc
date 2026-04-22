@@ -102,18 +102,41 @@ router.post("/add-book", upload.single("imageFile"), async (req, res) => {
   }
 });
 
-//Xem chi tiết
+// Xem chi tiết
 router.get("/book/:id", async (req, res) => {
   try {
     const bookId = req.params.id;
+    const Book = require("../models/Book");
     const bookInfo = await Book.findById(bookId);
 
     if (!bookInfo) {
       return res.send("Không tìm thấy sách này!");
     }
 
-    // Truyền dữ liệu sách sang trang giao diện chi tiết
-    res.render("book-detail", { book: bookInfo });
+    // --- KIỂM TRA MUA HÀNG ---
+    const Order = require("../models/Order");
+    let hasPurchased = false;
+
+    if (req.session && req.session.userId) {
+      // Tìm các đơn hàng "Hoàn thành" của user
+      const orders = await Order.find({
+        userId: req.session.userId,
+        status: "Đã hoàn thành",
+      });
+
+      // Ép kiểu thành chữ String hết để so sánh, bao chuẩn 100%
+      hasPurchased = orders.some((order) =>
+        order.items.some(
+          (item) => item.bookId && String(item.bookId) === String(bookId),
+        ),
+      );
+    }
+
+    // BẮT BUỘC PHẢI TRUYỀN BIẾN hasPurchased SANG EJS
+    res.render("book-detail", {
+      book: bookInfo,
+      hasPurchased: hasPurchased,
+    });
   } catch (error) {
     console.log(error);
     res.send("Lỗi khi tải chi tiết sách!");
@@ -804,7 +827,7 @@ router.post("/chat", async (req, res) => {
         { role: "system", content: systemPrompt },
         { role: "user", content: userMessage },
       ],
-      model: "llama-3.3-70b-versatile", // Đây là model rất thông minh và siêu nhanh
+      model: "llama-3.3-70b-versatile",
       temperature: 0.7,
       max_tokens: 1024,
     });
@@ -817,6 +840,53 @@ router.post("/chat", async (req, res) => {
   } catch (error) {
     console.error("Lỗi Chatbot Groq:", error);
     res.json({ reply: "Dạ hệ thống đang bận, anh/chị thử lại sau nhé!" });
+  }
+});
+
+// ROUTE: THÊM BÌNH LUẬN
+router.post("/book/:id/comment", async (req, res) => {
+  try {
+    // SỬA CHỖ NÀY: .user thành .userId
+    if (!req.session || !req.session.userId) {
+      return res.send("Bạn cần đăng nhập để bình luận.");
+    }
+
+    const bookId = req.params.id;
+    const { content } = req.body;
+
+    // SỬA CHỖ NÀY: Lấy tên từ req.session.fullname
+    const username = req.session.fullname;
+
+    const Order = require("../models/Order");
+
+    // Lấy các đơn "Hoàn thành"
+    const orders = await Order.find({
+      userId: req.session.userId,
+      status: "Đã hoàn thành",
+    });
+
+    // Ép kiểu thành chữ (String) để kiểm tra
+    const hasPurchased = orders.some((order) =>
+      order.items.some(
+        (item) => item.bookId && String(item.bookId) === String(bookId),
+      ),
+    );
+
+    if (!hasPurchased) {
+      return res.send(
+        "Bạn chưa mua hoặc chưa nhận thành công cuốn sách này, không thể bình luận!",
+      );
+    }
+
+    const Book = require("../models/Book");
+    await Book.findByIdAndUpdate(bookId, {
+      $push: { comments: { user: username, content: content } },
+    });
+
+    res.redirect(`/book/${bookId}`);
+  } catch (error) {
+    console.error("Lỗi khi thêm bình luận:", error);
+    res.send("Đã xảy ra lỗi khi đăng bình luận.");
   }
 });
 

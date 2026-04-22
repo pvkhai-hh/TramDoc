@@ -9,7 +9,14 @@ const bookSchema = new mongoose.Schema({
     description: { type: String },
     stock: { type: Number, required: true, default: 0 },
     importPrice: { type: Number, required: true, default: 0 },
-    sold: { type: Number, default: 0 }
+    sold: { type: Number, default: 0 },
+    comments: [
+        {
+            user: String,     // Tên người bình luận (hoặc Email)
+            content: String,  // Nội dung bình luận
+            date: { type: Date, default: Date.now } // Thời gian bình luận
+        }
+    ]
 });
 
 module.exports = mongoose.model('Book', bookSchema);

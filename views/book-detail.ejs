@@ -63,6 +63,49 @@
                 </form>
 
             </div>
+            <div class="add-comment mt-4 mb-5">
+                <h4>Viết bình luận của bạn</h4>
+                
+                <% if (session && session.userId) { %>
+                    
+                    <% if (hasPurchased) { %>
+                        <form action="/book/<%= book._id %>/comment" method="POST">
+                            <div class="mb-3 mt-3">
+                                <textarea name="content" class="form-control" rows="3" placeholder="Chia sẻ cảm nghĩ của bạn về cuốn sách (Chất lượng giấy, nội dung...)" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success">Gửi Bình Luận</button>
+                        </form>
+                    
+                    <% } else { %>
+                        <div class="alert alert-warning mt-3" role="alert">
+                            <i class="fas fa-lock"></i> Bạn cần mua và nhận hàng thành công cuốn sách này mới có quyền gửi bình luận nhé!
+                        </div>
+                    <% } %>
+
+                <% } else { %>
+                    <div class="alert alert-info mt-3" role="alert">
+                        Vui lòng <a href="/dangnhap" class="alert-link text-decoration-underline">Đăng nhập</a> để có thể bình luận.
+                    </div>
+                <% } %>
+            </div>
+            <div class="comments-section mt-5">
+                <h3>Bình luận từ độc giả</h3>
+                <hr>
+                <% if (book.comments && book.comments.length > 0) { %>
+                    <% book.comments.forEach(comment => { %>
+                        <div class="comment mb-3 p-3 bg-light rounded">
+                            <strong><i class="fas fa-user"></i> <%= comment.user %></strong>
+                            <span class="text-muted" style="font-size: 0.8rem;">
+                                - <%= comment.date.toLocaleDateString('vi-VN') %>
+                            </span>
+                            <p class="mt-2 mb-0"><%= comment.content %></p>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>Chưa có bình luận nào. Hãy là người đầu tiên nhận xét về cuốn sách này!</p>
+                <% } %>
+            </div>
+            
         </div>
     </div>
 
